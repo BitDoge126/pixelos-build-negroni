@@ -1,7 +1,7 @@
 name: OnePlus 10 Pro PixelOS Android 16 Build
 
 on:
-  workflow_dispatch: # Isse aap jab chahein button daba kar build shuru kar sakte hain
+  workflow_dispatch: # Isse aap button daba kar jab chahein build shuru kar sakte hain
 
 jobs:
   build:
@@ -29,7 +29,7 @@ jobs:
         chmod a+x ~/bin/repo
         sudo ln -sf ~/bin/repo /usr/bin/repo
 
-    - name: Initialize & Sync PixelOS Source
+    - name: Initialize PixelOS Source
       run: |
         git config --global user.email "divyanshverma@example.com"
         git config --global user.name "BitDoge126"
@@ -38,17 +38,21 @@ jobs:
         echo -e "\n\n" | repo init -u https://github.com/PixelOS-AOSP/manifest.git -b fourteen --depth=1 --no-clone-bundle --no-tags
         repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-    - name: Clone OnePlus 10 Pro Trees
+    - name: Clone OnePlus 10 Pro Trees (Device, Kernel, Vendor)
       run: |
         cd ~/pixelos
-        # Aapke fork kiye hue trees ko clone kar rahe hain
+        # 1. Device Tree cloning
         git clone https://github.com/BitDoge126/android_device_oneplus_wly.git -b lineage-23.0 device/oneplus/negroni
-        # Note: Kernel aur Vendor trees ke exact links aur paths yahan add karne honge
+        
+        # 2. Kernel Tree cloning (Jo aapne abhi fork kiya)
+        git clone https://github.com/BitDoge126/android_kernel_oneplus_sm8450.git -b lineage-23.1 kernel/oneplus/sm8450
+        
+        # 3. Vendor Tree cloning (TheMuppets se automatic proprietary files link)
+        git clone https://github.com/TheMuppets/proprietary_vendor_oneplus.git -b lineage-21 vendor/oneplus
 
     - name: Build Custom ROM
       run: |
         cd ~/pixelos
         source build/envsetup.sh
-        # Lunch command aapki ROM manifest ke hissab se badal sakti hai
-        lunch lineage_negroni-userdebug || lunch pixelos_negroni-userdebug
+        lunch pixelos_negroni-userdebug || lunch lineage_negroni-userdebug
         mka bacon -j$(nproc --all)
