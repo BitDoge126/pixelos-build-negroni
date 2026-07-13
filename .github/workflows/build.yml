@@ -10,12 +10,20 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Free up GitHub Runner Space
+    - name: Maximize GitHub Runner Space
       run: |
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf /usr/local/lib/android
         sudo rm -rf /opt/ghc
         sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf /usr/share/swift
+        sudo rm -rf /usr/local/share/chromium
+        sudo rm -rf /usr/local/lib/node_modules
+        sudo rm -rf /opt/pipx
+        sudo rm -rf /opt/microsoft
+        docker rmi $(docker images -q) || true
+        sudo apt-get clean
+        df -h
         
     - name: Install Build Dependencies
       run: |
